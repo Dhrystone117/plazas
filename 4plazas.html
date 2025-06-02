@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Estado de Plazas</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+    }
+    h2 {
+      margin-top: 20px;
+    }
+    .plaza {
+      width: 120px;
+      height: 120px;
+      margin: 15px;
+      display: inline-block;
+      color: white;
+      font-size: 24px;
+      font-weight: bold;
+      line-height: 120px;
+      border-radius: 12px;
+      transition: background-color 0.5s ease;
+    }
+    #contenedor {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+  </style>
+</head>
+<body>
+  <h2>Estado de Plazas</h2>
+  <div id="contenedor">
+    <div class="plaza" id="p101">101</div>
+    <div class="plaza" id="p102">102</div>
+    <div class="plaza" id="p103">103</div>
+    <div class="plaza" id="p104">104</div>
+  </div>
+
+  <script>
+    const canalID = "2978783";
+    const apiKey = "BO53O8OZN6P8JAG0"; // deja en blanco si el canal es público
+
+    async function actualizarPlazas() {
+      try {
+        const url = `https://api.thingspeak.com/channels/2978783/feeds/last.json` +
+                    (apiKey ? `?api_key=${apiKey}` : "");
+
+        const response = await fetch(url);
+        const data = await response.json();
+
+        for (let i = 1; i <= 4; i++) {
+          const estado = parseInt(data[`field${i}`]);
+          const div = document.getElementById(`p10${i}`);
+          div.style.backgroundColor = (estado === 1) ? "red" : "green";
+        }
+      } catch (e) {
+        console.error("Error al leer ThingSpeak:", e);
+      }
+    }
+
+    actualizarPlazas();
+    setInterval(actualizarPlazas, 10000); // actualiza cada 10 segundos
+  </script>
+</body>
+</html>

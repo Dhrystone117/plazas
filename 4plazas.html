@@ -158,6 +158,7 @@
           document.getElementById('estadoPlazas').style.display = 'block';
           document.getElementById('loginForm').style.display = 'none';
           cargarEstado();
+          setInterval(cargarEstado, 10000);
         })
         .catch((error) => {
           mostrarError("error", "Error de login: " + error.message);

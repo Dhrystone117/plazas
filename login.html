@@ -220,8 +220,16 @@
       try {
         const res = await fetch("https://api.thingspeak.com/channels/TU_CANAL_ID/feeds/last.json");
         const data = await res.json();
-        for (let i = 1; i <= 4; i++) {
-          const estado = parseInt(data[`field${i}`]);
+        for (let i = 0; i < 4; i++) {
+          const fieldIndex = i + 1;
+          const plazaId = ['101', '102', '103', '104'][i];
+          const estado = parseInt(data[`field${fieldIndex}`]);
+          const div = document.getElementById(`p${plazaId}`);
+          if (div) {
+            div.style.backgroundColor = estado === 1 ? 'red' : 'green';
+            await db.collection("plazas").doc(plazaId).set({ ocupada: estado === 1 });
+          }
+        }`]);
           const plazaId = `10${i}`;
           const div = document.getElementById(`p${plazaId}`);
           div.style.backgroundColor = estado === 1 ? 'red' : 'green';

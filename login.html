@@ -220,27 +220,20 @@
       try {
         const res = await fetch("https://api.thingspeak.com/channels/TU_CANAL_ID/feeds/last.json");
         const data = await res.json();
-        for (let i = 0; i < 4; i++) {
-          const fieldIndex = i + 1;
-          const plazaId = ['101', '102', '103', '104'][i];
-          const estado = parseInt(data[`field${fieldIndex}`]);
-          const div = document.getElementById(`p${plazaId}`);
+        const plazas = ['101', '102', '103', '104'];
+        for (let i = 0; i < plazas.length; i++) {
+          const estado = parseInt(data[`field${i + 1}`]);
+          const div = document.getElementById(`p${plazas[i]}`);
           if (div) {
             div.style.backgroundColor = estado === 1 ? 'red' : 'green';
-            await db.collection("plazas").doc(plazaId).set({ ocupada: estado === 1 });
+            await db.collection("plazas").doc(plazas[i]).set({ ocupada: estado === 1 });
           }
-        }`]);
-          const plazaId = `10${i}`;
-          const div = document.getElementById(`p${plazaId}`);
-          div.style.backgroundColor = estado === 1 ? 'red' : 'green';
-          await db.collection("plazas").doc(plazaId).set({ ocupada: estado === 1 });
         }
       } catch (e) {
         mostrarError("error", "No se pudo obtener el estado de las plazas.");
       }
     }
 
-    // Mostrar login al inicio
     mostrarLogin();
   </script>
 </body>

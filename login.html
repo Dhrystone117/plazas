@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Login Parqueadero</title>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-auth-compat.js"></script>
@@ -69,8 +69,8 @@
       margin-top: 5px;
     }
     #loginForm, #registerForm {
-  display: block;
-}
+      display: block;
+    }
   </style>
 </head>
 <body>
@@ -99,6 +99,7 @@
       <div class="plaza" id="p102">102</div>
       <div class="plaza" id="p103">103</div>
       <div class="plaza" id="p104">104</div>
+      <div class="plaza" id="p105">105</div>
       <button onclick="logout()">Cerrar sesión</button>
     </div>
   </div>
@@ -154,11 +155,11 @@
       btnLogin.disabled = true;
 
       firebase.auth().signInWithEmailAndPassword(email, password)
-        .then((userCredential) => {
+        .then(() => {
           document.getElementById('estadoPlazas').style.display = 'block';
           document.getElementById('loginForm').style.display = 'none';
           cargarEstado();
-          setInterval(cargarEstado, 10000);
+          setInterval(cargarEstado, 10000); // Actualiza cada 10s
         })
         .catch((error) => {
           mostrarError("error", "Error de login: " + error.message);
@@ -176,31 +177,31 @@
       limpiarErrores();
 
       if (!email || !password) {
-        mostrarError("errorReg", "Por favor, completa ambos campos para registrarte.");
+        mostrarError("errorReg", "Por favor, completa ambos campos.");
         return;
       }
 
       if (!email.includes("@") || !email.includes(".")) {
-        mostrarError("errorReg", "Ingresa un correo válido.");
+        mostrarError("errorReg", "Correo inválido.");
         return;
       }
 
       if (password.length < 6) {
-        mostrarError("errorReg", "La contraseña debe tener al menos 6 caracteres.");
+        mostrarError("errorReg", "Mínimo 6 caracteres.");
         return;
       }
 
       btnRegistro.disabled = true;
 
       firebase.auth().createUserWithEmailAndPassword(email, password)
-        .then((userCredential) => {
-          alert("Cuenta creada correctamente. Ahora puedes iniciar sesión.");
+        .then(() => {
+          alert("Cuenta creada correctamente.");
           document.getElementById('emailReg').value = "";
           document.getElementById('passwordReg').value = "";
           mostrarLogin();
         })
         .catch((error) => {
-          mostrarError("errorReg", "Error al crear cuenta: " + error.message);
+          mostrarError("errorReg", "Error: " + error.message);
         })
         .finally(() => {
           btnRegistro.disabled = false;
@@ -218,19 +219,17 @@
 
     async function cargarEstado() {
       try {
-        const res = await fetch("https://api.thingspeak.com/channels/TU_CANAL_ID/feeds/last.json");
-        const data = await res.json();
-        const plazas = ['101', '102', '103', '104'];
-        for (let i = 0; i < plazas.length; i++) {
-          const estado = parseInt(data[`field${i + 1}`]);
-          const div = document.getElementById(`p${plazas[i]}`);
+        const snapshot = await db.collection("plazas").get();
+        snapshot.forEach(doc => {
+          const id = doc.id;
+          const estado = doc.data().ocupada;
+          const div = document.getElementById(`p${id}`);
           if (div) {
-            div.style.backgroundColor = estado === 1 ? 'red' : 'green';
-            await db.collection("plazas").doc(plazas[i]).set({ ocupada: estado === 1 });
+            div.style.backgroundColor = estado ? 'red' : 'green';
           }
-        }
+        });
       } catch (e) {
-        mostrarError("error", "No se pudo obtener el estado de las plazas.");
+        mostrarError("error", "Error al leer datos de Firebase.");
       }
     }
 
